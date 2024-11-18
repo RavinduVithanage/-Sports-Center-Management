@@ -7,6 +7,7 @@ use App\Models\User;
 use Hash;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Password;
 
 class AuthController extends Controller
 {
@@ -19,7 +20,7 @@ class AuthController extends Controller
 
         ]);
 
-        $user=User::created([
+        $user=User::create([
 
             "name"=>$validate['name'],
             "email"=>$validate['email'],
@@ -32,7 +33,7 @@ class AuthController extends Controller
            $token=$user->createToken('token-name')->plainTextToken;
 
            return response()->json([
-                "message"=>"registation sucessfull",
+                "message"=>"Registration successful",
                 "token_type"=>"bearer",
                 "token"=>$token
 
@@ -86,5 +87,28 @@ class AuthController extends Controller
         return response()->json([
             "message"=>"user not login",
        ]);
+    }
+
+    public function passwordReset(Request $request):JsonResponse{
+
+        $request->validate(['email' => 'required|email']);
+
+        $user=User::where('email',$request->email)->first();
+
+        if($user){
+            $status = Password::sendResetLink(
+                $request->only('email')
+                
+            );
+
+            return response()->json([
+                "message"=>"now you can reset password",
+                "status"=>$status
+           ]);
+        }else{
+            return response()->json([
+                "message"=>"your not register",
+           ]);
+        }
     }
 }
