@@ -33,7 +33,7 @@ class AuthController extends Controller
            $token=$user->createToken('token-name')->plainTextToken;
 
            return response()->json([
-                "message"=>"Registration successful",
+                "message"=>"registation sucessfull",
                 "token_type"=>"bearer",
                 "token"=>$token
 
@@ -68,7 +68,7 @@ class AuthController extends Controller
             $token=$user->createToken('token-name')->plainTextToken;
 
             return response()->json([
-                 "message"=>"registation sucessfull",
+                 "message"=>"login sucessfull",
                  "token_type"=>"bearer",
                  "token"=>$token
  
@@ -79,14 +79,16 @@ class AuthController extends Controller
     public function userLogout(Request $request):JsonResponse{
 
         if($request->user()){
-            $request->user->tokens()->delete();
+            $request->user()->currentAccessToken()->delete();
+
             return response()->json([
                 "message"=>"Logout sucessfull",
            ]);
-        }
+        }else{
         return response()->json([
             "message"=>"user not login",
        ]);
+         }
     }
 
     public function passwordReset(Request $request):JsonResponse{
