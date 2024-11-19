@@ -91,26 +91,35 @@ class AuthController extends Controller
          }
     }
 
-    public function passwordReset(Request $request):JsonResponse{
-
+    public function passwordReset(Request $request): JsonResponse
+    {
+        // Validate the email input
         $request->validate(['email' => 'required|email']);
-
-        $user=User::where('email',$request->email)->first();
-
-        if($user){
-            $status = Password::sendResetLink(
-                $request->only('email')
-                
-            );
-
+    
+        // Check if the user exists
+        $user = User::where('email', $request->email)->first();
+    
+        if (!$user) {
             return response()->json([
-                "message"=>"now you can reset password",
-                "status"=>$status
-           ]);
-        }else{
+                "message" => "You are not registered.",
+            ], 404);
+        }
+    
+        // Attempt to send the reset link
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+    
+        if ($status === Password::RESET_LINK_SENT) {
             return response()->json([
-                "message"=>"your not register",
-           ]);
+                "message" => "Password reset link sent successfully.",
+                "status" => __($status),
+            ], 200);
+        } else {
+            return response()->json([
+                "message" => "Failed to send password reset link. Please try again later.",
+                "status" => __($status),
+            ], 500);
         }
     }
 }
